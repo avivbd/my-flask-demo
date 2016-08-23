@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, redirect
 import numpy as np
 from bokeh.plotting import figure, output_file, save 
-
+import simplejson as json
+import requests 
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -16,27 +18,29 @@ def index():
     if request.method == 'GET':
           return render_template('index2.html')
     else:
+          app.vars['stock'] = request.form['stock_name']
           return redirect('/plot') 
 
 @app.route('/plot',methods = ['GET','POST'])
 def plot():          
-          #app.vars['stock'] = request.form['stock_name'] 
-          # prepare some data
-          N = 4000
-          x = np.random.random(size=N) * 100
-          y = np.random.random(size=N) * 100
-          radii = np.random.random(size=N) * 1.5
-          colors = [
-          "#%02x%02x%02x" % (int(r), int(g), 150) for r, g in zip(50+2*x, 30+2*y)
-          ]
-          # output to static HTML file (with CDN resources)
-          output_file("templates/plot_file.html", title="color_scatter.py example", mode="cdn")
+
+          # get data from quandl 
+          raw_req = requests.get('https://www.quandl.com/api/v1/datasets/WIKI/%s' % (app.vars['stock']))
+          pdreq = pd.io.json.json_normalize(raw_req.json()) #get json object and normalize it
+
+          #arrange in dataframe         
+          df = pd.DataFrame(pdreq['data'][0], columns=pdreq['column_names'][0]) 
+          df['Date'] = pd.to_datetime(df['Date']) #convert date to datetime
+          
+          #make a figure
+          output_file("templates/plot_file.html", title="Stock price", mode="cdn")
           TOOLS="resize,crosshair,pan,wheel_zoom,box_zoom,reset,box_select,lasso_select"
-          # create a new plot with the tools above, and explicit ranges
-          p = figure(tools=TOOLS, x_range=(0,100), y_range=(0,100))
-          # add a circle renderer with vectorized colors and sizes
-          p.circle(x,y, radius=radii, fill_color=colors, fill_alpha=0.6, line_color=None)
-          # show the results
+          p = figure(width=800, height=550, x_axis_type="datetime", tools = TOOLS)#
+          p.title.text_font_size = "25px"
+          p.title.text = "Price of stock: %s " % (app.vars['stock'])
+          p.line(df['Date'], df['Close'], line_width=2, color='navy', legend='Closing price')
+
+          #save figure to a html file and render it
           save(p)
           return render_template('plot_file.html') 
          
@@ -45,21 +49,6 @@ def plot():
 
 if __name__ == '__main__':
   app.run(host='104.131.171.187',debug = 'True')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
