@@ -1,10 +1,11 @@
-# Flask on Heroku
+Stock ticker price app. Plots the price of stocks as requested by the user.  
 
-This project is intended to help you tie together some important concepts and
-technologies from the 12-day course, including Git, Flask, JSON, Pandas,
-Requests, Heroku, and Bokeh for visualization.
+Project aimed at demonstrating proficiency in using  Git, Flask, JSON, Pandas,
+Requests, Heroku, and Bokeh.
 
-The repository contains a basic template for a Flask configuration that will
-work on Heroku.
+Carried out in preperation for participation in The Data Incubator, Fall 2016. 
 
-A [finished example](https://lemurian.herokuapp.com) that demonstrates some basic functionality.
+In constructing the app the following resources were used:
+https://github.com/thedataincubator/flask-demo
+https://github.com/bev-a-tron/MyFlaskTutorial
+
